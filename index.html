@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Desafío Activo! - Trivia de Vida Saludable</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Tools & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        activeGreen: '#10B981',
+                        activeBlue: '#06B6D4',
+                        activeYellow: '#F59E0B',
+                        activeOrange: '#F97316',
+                        activePurple: '#8B5CF6',
+                        activePink: '#EC4899',
+                    },
+                    fontFamily: {
+                        display: ['Fredoka', 'sans-serif'],
+                        body: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+
+        .font-display {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* Glassmorphism elements */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Interactive Buttons 3D style */
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 0 var(--btn-shadow);
+        }
+        .btn-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 var(--btn-shadow);
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--btn-shadow);
+        }
+
+        .btn-green { --btn-shadow: #047857; }
+        .btn-blue { --btn-shadow: #0e7490; }
+        .btn-yellow { --btn-shadow: #b45309; }
+        .btn-orange { --btn-shadow: #c2410c; }
+        .btn-purple { --btn-shadow: #6d28d9; }
+
+        /* Custom Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.6)); }
+            50% { filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.9)); }
+        }
+        .animate-glow {
+            animation: pulse-glow 3s infinite;
+        }
+
+        /* Option cards animation */
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10B981;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between items-center p-3 sm:p-6 overflow-x-hidden relative">
+
+    <!-- Decorative Animated Background Shapes -->
+    <div class="fixed top-10 left-5 w-24 h-24 sm:w-32 sm:h-32 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+    <div class="fixed bottom-10 right-5 w-32 h-32 sm:w-48 sm:h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+    <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Header / Navbar -->
+    <header class="w-full max-w-4xl glass-dark rounded-2xl p-4 mb-4 flex justify-between items-center shadow-lg border border-white/10 z-10">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center text-white shadow-md text-xl sm:text-2xl animate-bounce">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+                <h1 class="font-display text-lg sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-300 to-yellow-300">
+                    ¡Desafío Vida Activa!
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 font-medium hidden sm:block">Trivia interactiva para 5° Básico</p>
+            </div>
+        </div>
+
+        <!-- Score & Sound Controls -->
+        <div class="flex items-center space-x-3">
+            <!-- Sound FX Toggle Button -->
+            <button id="soundToggleBtn" onclick="toggleSound()" class="w-10 h-10 bg-slate-800/80 hover:bg-slate-700 text-yellow-400 rounded-xl flex items-center justify-center border border-white/10 transition" title="Activar/Desactivar Sonidos Visuales">
+                <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Score Pill -->
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 sm:px-4 py-1.5 rounded-xl flex items-center space-x-2 font-display text-sm sm:text-base font-bold shadow-md">
+                <i class="fa-solid fa-star text-yellow-200 animate-spin" style="animation-duration: 8s;"></i>
+                <span id="scoreDisplay">0</span>
+                <span class="text-xs font-normal opacity-80">pts</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-3xl flex-grow flex items-center justify-center z-10 my-2">
+
+        <!-- 1. PANTALLA DE INICIO -->
+        <div id="startScreen" class="w-full glass-card rounded-3xl p-6 sm:p-10 text-slate-800 text-center shadow-2xl relative overflow-hidden transition-all duration-300">
+            <!-- Decorative badge -->
+            <span class="inline-block bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-display text-xs sm:text-sm px-4 py-1.5 rounded-full uppercase tracking-wider font-bold mb-4 shadow-sm">
+                🏃‍♂️ Mueve tu cuerpo - 5° Básico 🚴‍♀️
+            </span>
+
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold text-slate-900 mb-4 leading-tight">
+                ¿Qué tanto sabes sobre el <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-cyan-600">Sedentarismo</span> y la <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Energía</span>?
+            </h2>
+
+            <p class="text-slate-600 text-base sm:text-lg mb-8 max-w-xl mx-auto font-medium">
+                Responde 10 preguntas super divertidas, acumula estrellas y descubre trucos geniales para ganarle al sillón y llenar tu día de energía.
+            </p>
+
+            <div class="grid grid-cols-3 gap-3 mb-8 max-w-md mx-auto">
+                <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 flex flex-col items-center">
+                    <span class="text-2xl sm:text-3xl mb-1">🎮</span>
+                    <span class="text-xs font-bold text-emerald-800">10 Preguntas</span>
+                </div>
+                <div class="bg-cyan-50 p-3 rounded-2xl border border-cyan-200 flex flex-col items-center">
+                    <span class="text-2xl sm:text-3xl mb-1">⭐</span>
+                    <span class="text-xs font-bold text-cyan-800">Gana Puntos</span>
+                </div>
+                <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 flex flex-col items-center">
+                    <span class="text-2xl sm:text-3xl mb-1">🏆</span>
+                    <span class="text-xs font-bold text-amber-800">Consigue Medallas</span>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="btn-3d btn-green w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-display text-xl font-bold rounded-2xl tracking-wide flex items-center justify-center space-x-3 mx-auto">
+                <span>¡EMPEZAR EL DESAFÍO!</span>
+                <i class="fa-solid fa-play"></i>
+            </button>
+        </div>
+
+        <!-- 2. PANTALLA DE PREGUNTAS -->
+        <div id="quizScreen" class="w-full glass-card rounded-3xl p-5 sm:p-8 text-slate-800 shadow-2xl hidden flex-col transition-all duration-300">
+            
+            <!-- Barra de Progreso Superior -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-500 mb-2">
+                    <span id="questionCounter">Pregunta 1 de 10</span>
+                    <span id="categoryBadge" class="bg-cyan-100 text-cyan-800 px-3 py-0.5 rounded-full font-semibold">Salud y Movimiento</span>
+                </div>
+                <div class="w-full bg-slate-200 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-300">
+                    <div id="progressBar" class="bg-gradient-to-r from-emerald-400 via-cyan-400 to-amber-400 h-full rounded-full transition-all duration-500" style="width: 10%;"></div>
+                </div>
+            </div>
+
+            <!-- Pregunta actual -->
+            <div class="mb-6 text-center">
+                <span id="questionEmoji" class="text-4xl sm:text-5xl block mb-2 animate-float">🧘‍♀️</span>
+                <h3 id="questionText" class="font-display text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+                    Cargando pregunta...
+                </h3>
+            </div>
+
+            <!-- Opciones de Respuesta (Botones) -->
+            <div id="optionsContainer" class="grid grid-cols-1 gap-3 sm:gap-4 mb-6">
+                <!-- Se generan dinámicamente mediante JS -->
+            </div>
+
+            <!-- Tarjeta de Explicación / Dato Curioso (Oculta al inicio) -->
+            <div id="explanationBox" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-slate-800 animate-fade-in">
+                <div class="flex items-start space-x-3">
+                    <span class="text-3xl">💡</span>
+                    <div>
+                        <h4 class="font-display font-bold text-amber-900 text-sm sm:text-base mb-1" id="expTitle">¿Sabías que...?</h4>
+                        <p id="expText" class="text-xs sm:text-sm text-amber-950 font-medium">Explicación detallada...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Siguiente Pregunta -->
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-3d btn-blue hidden w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-white font-display text-lg font-bold rounded-2xl justify-center items-center space-x-2">
+                <span>Siguiente Pregunta</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- 3. PANTALLA FINAL / RESULTADOS -->
+        <div id="resultScreen" class="w-full glass-card rounded-3xl p-6 sm:p-10 text-slate-800 text-center shadow-2xl hidden flex-col items-center transition-all duration-300">
+            <div id="medalIcon" class="text-6xl sm:text-7xl mb-2 animate-bounce">🏆</div>
+            
+            <h2 id="resultTitle" class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">
+                ¡Increíble Trabajo!
+            </h2>
+            
+            <p id="resultSubtitle" class="text-slate-600 text-sm sm:text-base font-medium mb-6">
+                Has completado el Desafío Vida Activa.
+            </p>
+
+            <!-- Resumen de Puntaje -->
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-5 rounded-2xl border-2 border-slate-200 w-full max-w-md mb-6 shadow-inner">
+                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Puntaje Final</div>
+                <div class="font-display text-4xl sm:text-5xl font-black text-amber-500 mb-2" id="finalScore">0 pts</div>
+                <div class="text-sm font-semibold text-slate-700" id="correctCountText">Respondiste correctamente 0 de 10 preguntas</div>
+            </div>
+
+            <!-- Medalla y Mensaje Motivacional -->
+            <div class="bg-emerald-50 border-2 border-emerald-300 p-4 rounded-2xl w-full max-w-md mb-8">
+                <div class="font-display font-bold text-emerald-800 text-lg mb-1" id="badgeTitle">🏅 Campeón del Movimiento</div>
+                <p id="motivationMessage" class="text-xs sm:text-sm text-emerald-900 font-medium">
+                    ¡Sigue así! Recuerda que cada pequeño paso cuenta para mantener tu cuerpo fuerte y tu mente brillante.
+                </p>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+                <button onclick="startGame()" class="btn-3d btn-green flex-1 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-display text-base font-bold rounded-2xl flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Jugar de Nuevo</span>
+                </button>
+                <button onclick="shareResults()" class="btn-3d btn-purple flex-1 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-display text-base font-bold rounded-2xl flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span>Compartir Logro</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification for feedback -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-xl border border-white/20 transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center space-x-2">
+        <span id="toastIcon">💡</span>
+        <span id="toastText">¡Mensaje de prueba!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-4xl text-center py-3 text-xs text-slate-400 z-10 font-medium">
+        <p>Aprende, juega y activa tu vida 🏃‍♀️ ⚽ 🚴‍♂️ | Trivia Educativa de Salud 5° Básico</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Banco de 10 preguntas diseñadas para niños de 10-11 años
+        const quizData = [
+            {
+                category: "Conceptos Básicos",
+                emoji: "🪑",
+                question: "¿Qué significa realmente tener un estilo de vida 'sedentario'?",
+                options: [
+                    { text: "Pasar mucho tiempo sentado o acostado casi sin mover el cuerpo.", correct: true },
+                    { text: "Hacer ejercicio dos horas todos los días sin descansar.", correct: false },
+                    { text: "Dormir las 8 horas recomendadas en la noche.", correct: false },
+                    { text: "Jugar al fútbol con tus amigos en el recreo.", correct: false }
+                ],
+                explanation: "El sedentarismo ocurre cuando realizamos muy poca actividad física durante el día. ¡Estar mucho tiempo sentado frente a las pantallas es el ejemplo más común!"
+            },
+            {
+                category: "Tiempo en Pantallas",
+                emoji: "📱",
+                question: "Para tener energía y cuidar tu salud, ¿cuál es el tiempo máximo diario recomendado en pantallas (celular/TV/juegos)?",
+                options: [
+                    { text: "Todo el día si no hay tareas.", correct: false },
+                    { text: "Máximo 2 horas al día para entretenimiento.", correct: true },
+                    { text: "Sin límite, las pantallas dan superpoderes.", correct: false },
+                    { text: "10 horas seguidas los fines de semana.", correct: false }
+                ],
+                explanation: "Los expertos recomiendan no pasar más de 2 horas libres al día frente a las pantallas para que tu vista descanse y tu cuerpo tenga tiempo de jugar activamente."
+            },
+            {
+                category: "Pausas Activas",
+                emoji: "⏰",
+                question: "Si estás estudiando o jugando videojuegos por 1 hora, ¿qué es una 'Pausa Activa'?",
+                options: [
+                    { text: "Cambiar de juego a la consola de tu amigo.", correct: false },
+                    { text: "Ponerte de pie 5 minutos para estirarte, caminar o tomar agua.", correct: true },
+                    { text: "Comer papas fritas mientras sigues sentado.", correct: false },
+                    { text: "Quedarte acostado mirando el techo.", correct: false }
+                ],
+                explanation: "Las pausas activas son breves descansos para mover las articulaciones y hacer circular la sangre. ¡Te ayudan a recargar concentración!"
+            },
+            {
+                category: "Ánimo y Energía",
+                emoji: "😄",
+                question: "¿Cómo reacciona tu cerebro cuando corres, bailas o haces tu deporte favorito?",
+                options: [
+                    { text: "Se pone triste y con sueño.", correct: false },
+                    { text: "Libera 'endorfinas', hormonas que te hacen sentir feliz y relajado.", correct: true },
+                    { text: "Pierde toda la memoria de lo que estudiaste.", correct: false },
+                    { text: "Se apaga por completo durante dos horas.", correct: false }
+                ],
+                explanation: "¡El ejercicio es como una poción de felicidad! Al moverte, el cuerpo produce endorfinas que mejoran tu estado de ánimo y eliminan el estrés."
+            },
+            {
+                category: "Alternativas Divertidas",
+                emoji: "🚴‍♀️",
+                question: "Si tu amigo te invita a jugar pero estás cansado de estar sentado, ¿cuál es la mejor opción activa?",
+                options: [
+                    { text: "Ver cómo él juega en su teléfono sin moverte.", correct: false },
+                    { text: "Invitarlo a andar en bici, bailar o jugar a la escondida.", correct: true },
+                    { text: "Quedarse ambos sentados mirando la televisión.", correct: false },
+                    { text: "Dormir una siesta de 5 horas.", correct: false }
+                ],
+                explanation: "¡Moverse juntos es más divertido! Andar en bicicleta, patinar o jugar a las atrapadas te ejercita casi sin darte cuenta."
+            },
+            {
+                category: "Hidratación",
+                emoji: "💧",
+                question: "¿Cuál es la mejor bebida para hidratar tu cuerpo cuando te ejercitas y te mueves?",
+                options: [
+                    { text: "Bebidas gaseosas llenas de azúcar.", correct: false },
+                    { text: "Agua pura y fresca.", correct: true },
+                    { text: "Jugos ultra procesados con colorantes.", correct: false },
+                    { text: "Jarabe de chocolate.", correct: false }
+                ],
+                explanation: "El agua es el combustible natural de tus músculos. Las bebidas azucaradas pueden darte energía muy rápida pero luego te darán más sed y cansancio."
+            },
+            {
+                category: "Super Cerebro",
+                emoji: "🧠",
+                question: "¿De qué manera el movimiento diario le ayuda a tus notas en el colegio?",
+                options: [
+                    { text: "Aumenta el oxígeno al cerebro, mejorando tu memoria y concentración.", correct: true },
+                    { text: "Hace que te olvides de hacer las tareas.", correct: false },
+                    { text: "No ayuda en nada a la mente, solo a las piernas.", correct: false },
+                    { text: "Hace que leas más despacio.", correct: false }
+                ],
+                explanation: "¡Un cuerpo activo crea una mente brillante! El ejercicio lleva más oxígeno al cerebro, ayudándote a entender y memorizar más rápido tus materias."
+            },
+            {
+                category: "El Reto de los Pasos",
+                emoji: "👟",
+                question: "¿Sabías que existe una meta diaria de pasos para mantener un corazón fuerte?",
+                options: [
+                    { text: "Dar 10 pasos de la cama al sillón.", correct: false },
+                    { text: "Dar alrededor de 8,000 a 10,000 pasos al día.", correct: true },
+                    { text: "Dar 100,000 pasos corriendo sin parar.", correct: false },
+                    { text: "No caminar nada y usar solo ascensor.", correct: false }
+                ],
+                explanation: "Caminar hacia la escuela, pasear al perro o subir escaleras te ayuda a sumar fácilmente miles de pasos para mantener un corazón fuerte."
+            },
+            {
+                category: "Sueño Reparador",
+                emoji: "😴",
+                question: "¿Qué le pasa a tu sueño en la noche si pasas todo el día sentado frente a pantallas?",
+                options: [
+                    { text: "Duermes increíblemente bien de inmediato.", correct: false },
+                    { text: "Cuesta más conciliar el sueño y te despiertas con cansancio.", correct: true },
+                    { text: "Te despiertas con superpoderes al día siguiente.", correct: false },
+                    { text: "No necesitas dormir por tres días.", correct: false }
+                ],
+                explanation: "La luz de las pantallas confunde al cerebro haciéndole creer que es de día, y la falta de ejercicio deja energía atrapada que dificulta descansar profundamente."
+            },
+            {
+                category: "Trabajo en Equipo",
+                emoji: "👨‍👩‍👧‍👦",
+                question: "¿Cómo puedes contagiar la vida activa a tu familia y amigos?",
+                options: [
+                    { text: "Proponiendo paseos al parque, partidos en grupo o bailar juntos.", correct: true },
+                    { text: "Pidiéndoles que te traigan la comida a la cama.", correct: false },
+                    { text: "Desconectando el internet de toda la casa de golpe.", correct: false },
+                    { text: "Regalándoles sillones más cómodos.", correct: false }
+                ],
+                explanation: "¡El entusiasmo se contagia! Proponer juegos al aire libre o caminatas en familia hace que todos estén más sanos y felices unidos."
+            }
+        ];
+
+        // Estado del Juego
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctAnswersCount = 0;
+        let soundEnabled = true;
+        let answeredCurrent = false;
+
+        // Web Audio API para Efectos de Sonido Visuales / Audibles
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Sonido alegre ascendente
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3); // A5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    // Sonido grave descendente
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'click') {
+                    // Pop suave
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                }
+            } catch (e) {
+                console.log("Audio not supported or blocked");
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundIcon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                soundIcon.className = "fa-solid fa-volume-high";
+                showToast("🔊 Sonidos activados");
+            } else {
+                soundIcon.className = "fa-solid fa-volume-xmark";
+                showToast("🔇 Sonidos silenciados");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2000);
+        }
+
+        // Iniciar Juego
+        function startGame() {
+            playSound('click');
+            currentQuestionIndex = 0;
+            score = 0;
+            correctAnswersCount = 0;
+            updateScoreDisplay();
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            document.getElementById('quizScreen').classList.add('flex');
+
+            loadQuestion();
+        }
+
+        // Cargar Pregunta Actual
+        function loadQuestion() {
+            answeredCurrent = false;
+            const currentQuiz = quizData[currentQuestionIndex];
+
+            // UI Elements
+            document.getElementById('questionCounter').innerText = `Pregunta ${currentQuestionIndex + 1} de ${quizData.length}`;
+            document.getElementById('categoryBadge').innerText = currentQuiz.category;
+            document.getElementById('questionEmoji').innerText = currentQuiz.emoji;
+            document.getElementById('questionText').innerText = currentQuiz.question;
+            
+            // Progress Bar
+            const progressPercent = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            // Ocultar explicación y botón siguiente
+            document.getElementById('explanationBox').classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+
+            // Renderizar Opciones
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const colors = [
+                { bg: 'bg-emerald-500 hover:bg-emerald-400', border: 'border-emerald-600', shadow: 'btn-green' },
+                { bg: 'bg-cyan-500 hover:bg-cyan-400', border: 'border-cyan-600', shadow: 'btn-blue' },
+                { bg: 'bg-amber-500 hover:bg-amber-400', border: 'border-amber-600', shadow: 'btn-yellow' },
+                { bg: 'bg-purple-500 hover:bg-purple-400', border: 'border-purple-600', shadow: 'btn-purple' }
+            ];
+
+            currentQuiz.options.forEach((opt, index) => {
+                const colorStyle = colors[index % colors.length];
+                const button = document.createElement('button');
+                button.className = `option-btn btn-3d ${colorStyle.shadow} w-full text-left p-4 rounded-2xl bg-white border-2 border-slate-200 text-slate-800 font-semibold text-sm sm:text-base flex items-center justify-between shadow-sm cursor-pointer hover:border-slate-300`;
+                button.onclick = () => selectOption(index, button);
+                
+                button.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="w-8 h-8 rounded-xl bg-slate-100 font-display font-bold text-slate-600 flex items-center justify-center text-sm border border-slate-200">
+                            ${String.fromCharCode(65 + index)}
+                        </span>
+                        <span class="flex-1">${opt.text}</span>
+                    </div>
+                    <i class="fa-regular fa-circle text-slate-300 text-lg status-icon"></i>
+                `;
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Manejar Selección de Opción
+        function selectOption(selectedIndex, btnElement) {
+            if (answeredCurrent) return;
+            answeredCurrent = true;
+
+            const currentQuiz = quizData[currentQuestionIndex];
+            const isCorrect = currentQuiz.options[selectedIndex].correct;
+            const allOptionBtns = document.querySelectorAll('.option-btn');
+
+            // Deshabilitar todos los botones de opciones
+            allOptionBtns.forEach(btn => btn.style.pointerEvents = 'none');
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 100;
+                correctAnswersCount++;
+                updateScoreDisplay();
+
+                // Estilo botón correcto
+                btnElement.className = "option-btn w-full text-left p-4 rounded-2xl bg-emerald-100 border-2 border-emerald-500 text-emerald-900 font-bold text-sm sm:text-base flex items-center justify-between shadow-md";
+                btnElement.querySelector('.status-icon').className = "fa-solid fa-circle-check text-emerald-600 text-xl";
+
+                // Efecto confeti pequeño
+                triggerConfetti(0.3);
+
+            } else {
+                playSound('wrong');
+                // Estilo botón incorrecto
+                btnElement.className = "option-btn w-full text-left p-4 rounded-2xl bg-rose-100 border-2 border-rose-400 text-rose-900 font-semibold text-sm sm:text-base flex items-center justify-between shadow-sm";
+                btnElement.querySelector('.status-icon').className = "fa-solid fa-circle-xmark text-rose-500 text-xl";
+
+                // Resaltar la respuesta correcta
+                currentQuiz.options.forEach((opt, idx) => {
+                    if (opt.correct) {
+                        const correctBtn = allOptionBtns[idx];
+                        correctBtn.className = "option-btn w-full text-left p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-400 text-emerald-800 font-semibold text-sm sm:text-base flex items-center justify-between";
+                        correctBtn.querySelector('.status-icon').className = "fa-solid fa-circle-check text-emerald-500 text-xl";
+                    }
+                });
+            }
+
+            // Mostrar Explicación
+            const expBox = document.getElementById('explanationBox');
+            document.getElementById('expText').innerText = currentQuiz.explanation;
+            expBox.classList.remove('hidden');
+
+            // Mostrar Botón Siguiente
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('flex');
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('scoreDisplay').innerText = score;
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Pantalla Final de Resultados
+        function showResults() {
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            document.getElementById('resultScreen').classList.add('flex');
+
+            document.getElementById('finalScore').innerText = `${score} pts`;
+            document.getElementById('correctCountText').innerText = `Respondiste correctamente ${correctAnswersCount} de ${quizData.length} preguntas`;
+
+            const medalIcon = document.getElementById('medalIcon');
+            const badgeTitle = document.getElementById('badgeTitle');
+            const motivationMessage = document.getElementById('motivationMessage');
+
+            if (correctAnswersCount >= 9) {
+                medalIcon.innerText = "🏆";
+                badgeTitle.innerText = "🥇 ¡Super Campeón de la Vida Activa!";
+                motivationMessage.innerText = "¡Increíble! Eres un experto total en salud y movimiento. Sigue practicando deportes, jugando al aire libre e inspirando a tus compañeros.";
+                triggerConfetti(1.0);
+            } else if (correctAnswersCount >= 6) {
+                medalIcon.innerText = "🥈";
+                badgeTitle.innerText = "🥈 ¡Atleta del Conocimiento!";
+                motivationMessage.innerText = "¡Muy bien hecho! Tienes grandes conocimientos sobre cómo cuidar tu cuerpo. Recuerda aplicar las pausas activas cuando estudies.";
+                triggerConfetti(0.6);
+            } else {
+                medalIcon.innerText = "🥉";
+                badgeTitle.innerText = "🥉 ¡Aprendiz en Acción!";
+                motivationMessage.innerText = "¡Buen esfuerzo! Ahora conoces los mejores trucos para ganarle al sedentarismo. ¡Ponlos en práctica hoy mismo!";
+            }
+        }
+
+        // Efectos de Confeti
+        function triggerConfetti(intensity = 0.5) {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: Math.floor(100 * intensity),
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        // Compartir logro
+        function shareResults() {
+            playSound('click');
+            const textToCopy = `¡Logré ${score} puntos en la Trivia de Vida Activa para 5° Básico! 🏃‍♂️⚡ ¿Te animas a ganarle al sedentarismo?`;
+            
+            // Usar ejecutable para compatibilidad
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast("📋 Logro copiado al portapapeles");
+        }
+    </script>
+</body>
+</html>
